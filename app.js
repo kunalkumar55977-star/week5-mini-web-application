@@ -1,0 +1,140 @@
+(() => {
+  "use strict";
+  const DATA_URL = "data/students.json";
+  const state = { students: [], department: "all", query: "", sortBy: "name", sortDirection: 1 };
+  const $ = (selector) => document.querySelector(selector);
+  const elements = {
+    department: $("#department-filter"), search: $("#search-input"), rows: $("#student-rows"),
+    chart: $("#score-chart"), empty: $("#empty-state"), resultCount: $("#result-count"),
+    status: $("#status-message"), total: $("#total-students"), average: $("#average-score"),
+    attendance: $("#average-attendance"), support: $("#support-count"), chartTotal: $("#chart-total")
+  };
+
+  function escapeText(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[character]));
+  }
+  function initials(name) {
+    return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+  }
+  function visibleStudents() {
+    const query = state.query.trim().toLowerCase();
+    return state.students.filter((student) => {
+      const matchesDepartment = state.department === "all" || student.department === state.department;
+      const matchesQuery = !query || `${student.name} ${student.id} ${student.department}`.toLowerCase().includes(query);
+      return matchesDepartment && matchesQuery;
+    }).sort((a, b) => {
+      const first = a[state.sortBy], second = b[state.sortBy];
+      const result = typeof first === "number" ? first - second : String(first).localeCompare(String(second));
+      return result * state.sortDirection;
+    });
+  }
+  function statusFor(student) {
+    return student.score < 70 || student.attendance < 80
+      ? { label: "Needs support", className: "watch" }
+      : { label: "On track", className: "good" };
+  }
+  function renderMetrics(students) {
+    const count = students.length;
+    const averageScore = count ? students.reduce((sum, item) => sum + item.score, 0) / count : 0;
+    const averageAttendance = count ? students.reduce((sum, item) => sum + item.attendance, 0) / count : 0;
+    elements.total.textContent = count;
+    elements.average.textContent = count ? averageScore.toFixed(1) : "—";
+    elements.attendance.textContent = count ? averageAttendance.toFixed(1) : "—";
+    elements.support.textContent = students.filter((item) => statusFor(item).className === "watch").length;
+    const highAttendance = students.filter((item) => item.attendance >= 90).length;
+    const topStudent = [...students].sort((a, b) => b.score - a.score)[0];
+    $("#strong-attendance").textContent = `${highAttendance} of ${count} students have attendance of 90% or higher.`;
+    $("#top-score").textContent = topStudent ? `${topStudent.name} scored ${topStudent.score}/100.` : "No records in this view.";
+    $("#follow-up").textContent = `${students.filter((item) => statusFor(item).className === "watch").length} student(s) may benefit from follow-up.`;
+  }
+  function renderChart(students) {
+    const bands = [
+      { label: "Below 60", min: -Infinity, max: 59 },
+      { label: "60–69", min: 60, max: 69 },
+      { label: "70–79", min: 70, max: 79 },
+      { label: "80–89", min: 80, max: 89 },
+      { label: "90–100", min: 90, max: Infinity }
+    ];
+    const counts = bands.map((band) => students.filter((student) => student.score >= band.min && student.score <= band.max).length);
+    const max = Math.max(1, ...counts);
+    elements.chart.innerHTML = bands.map((band, index) => {
+      const count = counts[index], height = count ? Math.max(7, count / max * 125) : 3;
+      return `<div class="bar-group"><span class="bar-value">${count}</span><div class="bar" style="height:${height}px" aria-hidden="true"></div><span class="bar-label">${band.label}</span></div>`;
+    }).join("");
+    elements.chart.setAttribute("aria-label", `Score distribution across ${students.length} students: ${bands.map((band, index) => `${band.label}: ${counts[index]}`).join(", ")}.`);
+    elements.chartTotal.textContent = `Based on ${students.length} students`;
+  }
+  function renderTable(students) {
+    elements.rows.innerHTML = students.map((student) => {
+      const status = statusFor(student);
+      return `<tr>
+        <td><div class="student-cell"><span class="student-avatar" aria-hidden="true">${escapeText(initials(student.name))}</span><div><div class="student-name">${escapeText(student.name)}</div><div class="student-id">${escapeText(student.id)}</div></div></div></td>
+        <td>${escapeText(student.department)}</td>
+        <td><span class="score-cell">${student.score}</span><span class="progress-track" aria-hidden="true"><span class="progress-fill" style="display:block;width:${student.score}%"></span></span></td>
+        <td>${student.attendance}%</td><td><span class="status ${status.className}">${status.label}</span></td>
+      </tr>`;
+    }).join("");
+    elements.empty.hidden = students.length !== 0;
+    elements.rows.closest("table").hidden = students.length === 0;
+    elements.resultCount.textContent = `Showing ${students.length} of ${state.students.length} students`;
+  }
+  function render() {
+    const students = visibleStudents();
+    renderMetrics(students);
+    renderChart(students);
+    renderTable(students);
+  }
+  async function loadData() {
+    try {
+      const response = await fetch(DATA_URL, { cache: "force-cache" });
+      if (!response.ok) throw new Error(`Dataset request failed (${response.status}).`);
+      const data = await response.json();
+      if (!Array.isArray(data.students) || data.students.some((student) =>
+        !student.id || !student.name || !student.department ||
+        !Number.isFinite(student.score) || !Number.isFinite(student.attendance))) {
+        throw new Error("The student dataset has an unexpected format.");
+      }
+      state.students = data.students;
+      render();
+      elements.status.textContent = `Dashboard loaded. ${state.students.length} student records available.`;
+    } catch (error) {
+      console.error("Unable to load dashboard data:", error);
+      elements.chart.innerHTML = '<p class="loading-message">Could not load chart data.</p>';
+      elements.rows.innerHTML = '<tr><td colspan="5">Could not load student data. Run this project using a local web server, then refresh.</td></tr>';
+      elements.resultCount.textContent = "Data unavailable";
+      elements.status.textContent = "Data could not be loaded. Use a local web server and refresh.";
+    }
+  }
+  elements.department.addEventListener("change", (event) => {
+    state.department = event.target.value;
+    render();
+    elements.status.textContent = `Department filter applied. ${visibleStudents().length} records shown.`;
+  });
+  elements.search.addEventListener("input", (event) => {
+    state.query = event.target.value;
+    render();
+  });
+  document.querySelectorAll("[data-sort]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.sort;
+      state.sortDirection = state.sortBy === key ? state.sortDirection * -1 : 1;
+      state.sortBy = key;
+      render();
+      elements.status.textContent = `Sorted by ${key}, ${state.sortDirection === 1 ? "ascending" : "descending"}.`;
+    });
+  });
+  $("#reset-button").addEventListener("click", () => {
+    state.department = "all";
+    state.query = "";
+    state.sortBy = "name";
+    state.sortDirection = 1;
+    elements.department.value = "all";
+    elements.search.value = "";
+    render();
+    elements.status.textContent = "Filters and sorting have been reset.";
+    elements.department.focus();
+  });
+  loadData();
+})();

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="A responsive, accessible student performance dashboard using local JSON data.">
+  <title>Student Insights — Mini Dashboard</title>
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#" aria-label="Student Insights home">
+        <span class="brand-mark" aria-hidden="true">S</span><span>Student<span class="brand-light">Insights</span></span>
+      </a>
+      <p class="nav-label">WORKSPACE</p>
+      <nav>
+        <a class="nav-link active" href="#overview" aria-current="page"><span aria-hidden="true">▦</span> Overview</a>
+        <a class="nav-link" href="#records"><span aria-hidden="true">☷</span> Student records</a>
+        <a class="nav-link" href="#activity"><span aria-hidden="true">◷</span> Activity</a>
+      </nav>
+      <div class="sidebar-note">
+        <span class="note-icon" aria-hidden="true">✓</span>
+        <strong>Designed for everyone</strong>
+        <p>Keyboard-friendly controls, readable contrast, and a responsive layout.</p>
+      </div>
+      <div class="sidebar-footer">WEEK 5 PROJECT<br><span>Frontend Integration</span></div>
+    </aside>
+
+    <main id="main" class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">WORKSPACE / OVERVIEW</p>
+          <h1>Student dashboard</h1>
+          <p class="subtitle">A clear view of academic progress and engagement.</p>
+        </div>
+        <div class="profile" aria-label="Demo account"><span class="avatar" aria-hidden="true">KS</span><span><strong>Demo account</strong><small>Project preview</small></span></div>
+      </header>
+
+      <section id="overview" aria-labelledby="overview-title">
+        <div class="section-heading">
+          <div><h2 id="overview-title">Overview</h2><p>Sample data for the current term</p></div>
+          <label class="filter-label" for="department-filter">Department
+            <select id="department-filter">
+              <option value="all">All departments</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Design">Design</option>
+              <option value="Business">Business</option>
+            </select>
+          </label>
+        </div>
+        <div class="metrics-grid" aria-live="polite" aria-atomic="true">
+          <article class="metric-card"><div class="metric-top"><span>Total students</span><span class="metric-icon blue" aria-hidden="true">♙</span></div><p class="metric-value" id="total-students">—</p><p class="metric-foot"><span class="dot blue-dot"></span> Students in selected view</p></article>
+          <article class="metric-card"><div class="metric-top"><span>Average score</span><span class="metric-icon violet" aria-hidden="true">↗</span></div><p class="metric-value"><span id="average-score">—</span><small>/100</small></p><p class="metric-foot"><span class="status-pill positive">Academic score</span></p></article>
+          <article class="metric-card"><div class="metric-top"><span>Attendance</span><span class="metric-icon green" aria-hidden="true">✓</span></div><p class="metric-value"><span id="average-attendance">—</span><small>%</small></p><p class="metric-foot">Average attendance rate</p></article>
+          <article class="metric-card"><div class="metric-top"><span>Needs support</span><span class="metric-icon amber" aria-hidden="true">!</span></div><p class="metric-value" id="support-count">—</p><p class="metric-foot">Score below 70 or attendance below 80%</p></article>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel chart-panel" aria-labelledby="chart-title">
+          <div class="panel-heading"><div><h2 id="chart-title">Score distribution</h2><p>Number of students by score range</p></div><span class="panel-tag">LIVE FILTER</span></div>
+          <div id="score-chart" class="chart" role="img" aria-label="Score distribution chart. Data is also summarized in the table below.">
+            <p class="loading-message">Loading chart data…</p>
+          </div>
+          <div class="chart-legend"><span><i class="legend-dot" aria-hidden="true"></i> Student count</span><span id="chart-total">Based on 0 students</span></div>
+        </section>
+
+        <section id="activity" class="panel activity-panel" aria-labelledby="activity-title">
+          <div class="panel-heading"><div><h2 id="activity-title">Activity summary</h2><p>Quick performance signals</p></div></div>
+          <div class="activity-item"><span class="activity-symbol green-bg" aria-hidden="true">✓</span><div><strong>Strong attendance</strong><p id="strong-attendance">—</p></div></div>
+          <div class="activity-item"><span class="activity-symbol blue-bg" aria-hidden="true">↗</span><div><strong>Top score</strong><p id="top-score">—</p></div></div>
+          <div class="activity-item"><span class="activity-symbol amber-bg" aria-hidden="true">!</span><div><strong>Follow-up list</strong><p id="follow-up">—</p></div></div>
+          <div class="activity-foot">Insights are calculated from the local sample dataset.</div>
+        </section>
+      </div>
+
+      <section id="records" class="panel records-panel" aria-labelledby="records-title">
+        <div class="panel-heading records-heading"><div><h2 id="records-title">Student records</h2><p>Search, filter, and sort the sample dataset.</p></div>
+          <label class="search-label" for="search-input"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Search name or ID" autocomplete="off"></label>
+        </div>
+        <div class="table-meta"><span id="result-count" aria-live="polite">Loading records…</span><button id="reset-button" class="text-button" type="button">Reset filters</button></div>
+        <div class="table-wrap">
+          <table>
+            <caption class="sr-only">Student records with department, score, and attendance. Activate a column heading to change sort order.</caption>
+            <thead><tr>
+              <th scope="col"><button class="sort-button" type="button" data-sort="name" aria-label="Sort by student name">Student <span aria-hidden="true">↕</span></button></th>
+              <th scope="col"><button class="sort-button" type="button" data-sort="department" aria-label="Sort by department">Department <span aria-hidden="true">↕</span></button></th>
+              <th scope="col"><button class="sort-button" type="button" data-sort="score" aria-label="Sort by score">Score <span aria-hidden="true">↕</span></button></th>
+              <th scope="col"><button class="sort-button" type="button" data-sort="attendance" aria-label="Sort by attendance">Attendance <span aria-hidden="true">↕</span></button></th>
+              <th scope="col">Status</th>
+            </tr></thead>
+            <tbody id="student-rows"><tr><td colspan="5">Loading records…</td></tr></tbody>
+          </table>
+        </div>
+        <p id="empty-state" class="empty-state" hidden>No students match your filters. Try another search or reset filters.</p>
+      </section>
+      <footer class="page-footer"><span>Student Insights · Week 5 mini web application</span><span>Sample data only · Not for real academic decisions</span></footer>
+      <div id="status-message" class="sr-only" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+</body>
+</html>
