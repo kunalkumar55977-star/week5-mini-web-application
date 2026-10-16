@@ -1,0 +1,89 @@
+{
+  "term": "Current term",
+  "students": [
+    {
+      "id": "ST-1001",
+      "name": "Aarav Sharma",
+      "department": "Computer Science",
+      "score": 92,
+      "attendance": 96
+    },
+    {
+      "id": "ST-1002",
+      "name": "Meera Patel",
+      "department": "Design",
+      "score": 86,
+      "attendance": 91
+    },
+    {
+      "id": "ST-1003",
+      "name": "Rohan Singh",
+      "department": "Computer Science",
+      "score": 68,
+      "attendance": 78
+    },
+    {
+      "id": "ST-1004",
+      "name": "Ananya Gupta",
+      "department": "Business",
+      "score": 88,
+      "attendance": 94
+    },
+    {
+      "id": "ST-1005",
+      "name": "Kabir Verma",
+      "department": "Computer Science",
+      "score": 74,
+      "attendance": 83
+    },
+    {
+      "id": "ST-1006",
+      "name": "Isha Nair",
+      "department": "Design",
+      "score": 95,
+      "attendance": 98
+    },
+    {
+      "id": "ST-1007",
+      "name": "Dev Malhotra",
+      "department": "Business",
+      "score": 61,
+      "attendance": 72
+    },
+    {
+      "id": "ST-1008",
+      "name": "Sara Khan",
+      "department": "Computer Science",
+      "score": 81,
+      "attendance": 89
+    },
+    {
+      "id": "ST-1009",
+      "name": "Arjun Rao",
+      "department": "Business",
+      "score": 77,
+      "attendance": 86
+    },
+    {
+      "id": "ST-1010",
+      "name": "Diya Joshi",
+      "department": "Design",
+      "score": 90,
+      "attendance": 93
+    },
+    {
+      "id": "ST-1011",
+      "name": "Neel Kapoor",
+      "department": "Computer Science",
+      "score": 56,
+      "attendance": 84
+    },
+    {
+      "id": "ST-1012",
+      "name": "Tara Das",
+      "department": "Business",
+      "score": 83,
+      "attendance": 88
+    }
+  ]
+}
